@@ -3,73 +3,54 @@
 (function () {
 
 
-   function DisplayHomePage() {
-       console.log("Home Page Called")
-       let AboutUsButton = document.getElementById("AboutUsBtn");
-       AboutUsButton.addEventListener("click", function () {
-           location.href = "about.html"
-       });
+    function DisplayLoginPage() {
+        // Obtain a reference to the messageArea using jQuery and initially hide it
+        var messageArea = $('#messageArea');
+        messageArea.hide();
 
+        // Add click event handler to the login button
+        $('#loginButton').on('click', function() {
+            // Set initial success flag to false
+            var success = false;
 
-       $("#AboutUsBtn").on("click", () => {
-           location.href = "index.html"
-       });
-       $("main").append('<p id="MainParagraph" class="mt-3" > This is the main paragraph</p> ');
-       $("body").append('<article class="container"><p id="ArticleParagraph" class="mt-3">This is my article paragraph</p></article>');
+            // Instantiate a new user
+            var user = new Core.User();
 
-       $("main").append('<p id="MainParagraph" class="mt-3"> This is my main Paragraph</p>');
+            // Make an Ajax call to the users.json data
+            $.get('/data/users.json', function(users) {
+                // Check if the username and password match
+                users.forEach(function(userData) {
+                    if (userData.username === $('#username').val() && userData.password === $('#password').val()) {
+                        success = true;
+                        user.displayName = userData.displayName;
+                        user.emailAddress = userData.emailAddress;
+                        user.username = userData.username;
+                    }
+                });
 
-   }
+                // If login was successful, store the user in sessionStorage and redirect to contact-list.html
+                if (success) {
+                    sessionStorage.setItem('user', user.serialize());
+                    messageArea.removeAttr('class');
+                    messageArea.hide();
+                    window.location.replace('contact-list.html');
+                } else {
+                    // If login failed, show an error message in the messageArea and focus on the username field
+                    $('#username').focus().select();
+                    messageArea.attr('class', 'alert alert-danger');
+                    messageArea.text('Login failed. Please check your username and password.');
+                    messageArea.show();
+                }
+            });
+        });
 
-       function DisplayProductsPage() {
-           console.log("Products Page Called")
-
-       }
-
-       function DisplayServicePage() {
-           console.log("Service Page Called")
-       }
-
-
-       function DisplayAboutUsPage() {
-
-       }
-
-       function DisplayContactPage() {
-           console.log("Contact Page Called")
-
-           let sendButton = document.getElementById("sendButton");
-           let subscribeCheckBox = document.getElementById("subscribeCheckbox");
-
-           sendButton.addEventListener("click", function (event) {
-               event.preventDefault();
-               if (subscribeCheckBox.checked) {
-
-                   let contact = new Contact(fullName.value, contactNumber.value, emailAddress.value);
-                   if (contact.serialize()) {
-                       let key = contact.FullName.substring(0, 1) + Date.now();
-                       localStorage.setItem(key, contact.serialize());
-                   }
-
-               }
-
-           });
-
-           sendButton.addEventListener("click", function (event) {
-
-               if (subscribeCheckBox.checked) {
-
-                   let contact = new Contact(fullName.value, contactNumber.value, emailAddress.value);
-                   if (contact.serialize()) {
-                       let key = contact.FullName.substring(0, 1) + Date.now();
-                       localStorage.setItem(key, contact.serialize());
-                   }
-
-               }
-           });
-
-
-       }
+        // Add click event handler to the cancel button
+        $('#cancelButton').on('click', function() {
+            // Reset the login form and return to index.html
+            $('#loginForm')[0].reset();
+            window.location.replace('index.html');
+        });
+    }
 
 
        function DisplayContactListPage() {
